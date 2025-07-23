@@ -31,7 +31,7 @@ def process_query(message, history):
         try:
             for file in message['files']:
                 docs = file_processor(file)
-
+                tables, images, texts = extract_components(docs)
             if message['text'].strip() == "" :
                 yield "PDF processing successful"
             else :
