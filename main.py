@@ -4,7 +4,7 @@ from langchain_ollama import ChatOllama
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 import gradio as gr
-import utils
+from utils import *
 
 llm = ChatOllama(model="llama3:latest", temperature=0.2)
 prompt = ChatPromptTemplate.from_messages([
@@ -12,6 +12,8 @@ prompt = ChatPromptTemplate.from_messages([
     MessagesPlaceholder(variable_name = "history"),
     ('user' , '{query}')
 ])
+
+llm_chain = prompt | llm
 
 def process_query(message, history):
     context = []
@@ -26,10 +28,16 @@ def process_query(message, history):
     if len(message['files']) == 0 :
         yield "Processing Query"
     else :
-        if message['text'].strip() == "" :
-            yield "Processing PDF"
-        else :
-            yield "waiting"
+        try:
+            for file in message['files']:
+                docs = file_processor(file)
+
+            if message['text'].strip() == "" :
+                yield "PDF processing successful"
+            else :
+                yield "waiting"
+        except Exception as e:
+            yield "Some error occurred. Try again."
     return {"text" : f"You said: {message['text']}"}
 
 def main():
