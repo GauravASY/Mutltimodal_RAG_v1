@@ -67,11 +67,11 @@ def extract_components(docs):
 
 def summarize(texts, tables):
     table_html = [table.metadata.text_as_html for table in tables]
-    table_summaries = summary_chain.batch(table_html)
-    text_summaries = summary_chain.batch(texts)
+    table_summaries = summary_chain.batch(table_html, max_concurrency=3)
+    text_summaries = summary_chain.batch(texts, max_concurrency=3)
     return text_summaries, table_summaries
 
 
 def summarize_images(images):
-    image_summaries = image_summary_chain.batch(images)
+    image_summaries = image_summary_chain.batch(images, max_concurrency=3)
     return image_summaries
