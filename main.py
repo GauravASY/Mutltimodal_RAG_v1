@@ -5,6 +5,7 @@ from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 import gradio as gr
 from utils import *
+from vectorstore import *
 
 llm = ChatOllama(model="llama3:latest", temperature=0.2)
 prompt = ChatPromptTemplate.from_messages([
@@ -34,6 +35,7 @@ def process_query(message, history):
                 tables, images, texts = extract_components(docs)
                 text_summaries, table_summaries = summarize(texts, tables)
                 image_summaries = summarize_images(images)
+                store_documents(texts, text_summaries, tables, table_summaries, images, image_summaries)
 
             if message['text'].strip() == "" :
                 yield "PDF processing successful"
