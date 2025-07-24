@@ -32,12 +32,14 @@ def process_query(message, history):
             for file in message['files']:
                 docs = file_processor(file)
                 tables, images, texts = extract_components(docs)
+                text_summaries, table_summaries = summarize(texts, tables)
+
             if message['text'].strip() == "" :
                 yield "PDF processing successful"
             else :
                 yield "waiting"
         except Exception as e:
-            yield "Some error occurred. Try again."
+            yield f"""Some error occurred. Try again. {e}"""
     return {"text" : f"You said: {message['text']}"}
 
 def main():
