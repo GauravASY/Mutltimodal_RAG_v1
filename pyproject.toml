@@ -10,6 +10,7 @@ dependencies = [
     "gradio>=5.37.0",
     "langchain>=0.3.26",
     "langchain-community>=0.3.27",
+    "langchain-core>=0.3.68",
     "langchain-ollama>=0.3.4",
     "unstructured[all-docs]>=0.18.3",
 ]
