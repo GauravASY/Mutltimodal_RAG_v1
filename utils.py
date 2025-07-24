@@ -1,5 +1,20 @@
 from unstructured.partition.pdf import partition_pdf
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_ollama import ChatOllama
 
+
+
+summarization_prompt = """
+You are an expert summary generator. 
+Your task is to generate concise summaries from the tables and text without losing any important information.
+Respond only with summary. No additional comments.
+Do not start your message by saying 'Here is the summary' or anything like that.
+Just provide the summary as it is
+Table or Text : {content}
+"""
+summary_llm = ChatOllama(model="gemma2:2b")
+summarization_prompt_template = ChatPromptTemplate.from_template(summarization_prompt)
+summary_chain = summarization_prompt_template | summary_llm
 
 def file_processor(file):
     try :
@@ -32,3 +47,9 @@ def extract_components(docs):
                 if "Image" in str(type(ele)):
                     images.append(ele.metadata.image_base64)
     return tables, images, texts
+
+def summarize(texts, tables):
+    table_html = [table.metadata.text_as_html for table in tables]
+    table_summaries = summary_chain.batch(table_html)
+    text_summaries = summary_chain.batch(texts)
+    return text_summaries, table_summaries
