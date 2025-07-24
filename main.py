@@ -33,7 +33,7 @@ def process_query(message, history):
                 docs = file_processor(file)
                 tables, images, texts = extract_components(docs)
                 text_summaries, table_summaries = summarize(texts, tables)
-
+                image_summaries = summarize_images(images)
             if message['text'].strip() == "" :
                 yield "PDF processing successful"
             else :

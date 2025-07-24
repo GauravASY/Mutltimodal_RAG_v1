@@ -1,6 +1,7 @@
 from unstructured.partition.pdf import partition_pdf
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama import ChatOllama
+from langchain_core.messages import HumanMessage
 
 
 
@@ -15,6 +16,22 @@ Table or Text : {content}
 summary_llm = ChatOllama(model="gemma2:2b")
 summarization_prompt_template = ChatPromptTemplate.from_template(summarization_prompt)
 summary_chain = summarization_prompt_template | summary_llm
+
+image_summarization_prompt = """
+You are an expert Image descrition generator.
+Your task is to generate detailed description of the Images provided. 
+Pay special attention to flow-charts, pie-charts, bar-graphs and other data visualisation techniques. Be specific about them. 
+"""
+
+image_llm = ChatOllama(model="llava-phi3")
+image_context_msg  = [(
+    "user", [
+    {'type' : 'text', 'text' : image_summarization_prompt},
+    {'type' : 'image_url',  'image_url': {"url": "data:image/jpeg;base64,{base64_image}"},}
+])]
+image_summarization_prompt_template = ChatPromptTemplate.from_messages(image_context_msg)
+image_summary_chain = image_summarization_prompt_template | image_llm
+
 
 def file_processor(file):
     try :
@@ -53,3 +70,8 @@ def summarize(texts, tables):
     table_summaries = summary_chain.batch(table_html)
     text_summaries = summary_chain.batch(texts)
     return text_summaries, table_summaries
+
+
+def summarize_images(images):
+    image_summaries = image_summary_chain.batch(images)
+    return image_summaries
