@@ -4,7 +4,7 @@ Multimodal Retrieval-Augmented Generation (RAG) for complex PDF documents using 
 ------
 
 `Disclaimer`:
-Since models are run locally, your local machine must meet some hardware specifications. At least 6 GB of available system memory is required. 
+Since models are run locally, your local machine must meet some hardware specifications. At least 5 GB of available system memory is required. 
 
 ## Features
 
