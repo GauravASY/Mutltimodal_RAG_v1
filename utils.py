@@ -75,3 +75,48 @@ def summarize(texts, tables):
 def summarize_images(images):
     image_summaries = image_summary_chain.batch(images, max_concurrency=3)
     return image_summaries
+
+def parse_docs(docs):
+    texts = []
+    images = []
+    for doc in docs:
+        if 'CompositeElement' in str(type(doc)):
+            texts.append(doc)
+        else:
+            images.append(doc)
+    return {"texts": texts, "images": images}
+
+
+def build_prompt(args):
+    context = args['context']
+    query = args['query']
+    history = args.get('history', [])
+
+    context_texts= ""
+    if len(context['texts']) > 0:
+        for text_element in context['texts']:
+            context_texts += text_element.page_content 
+
+    human_prompt = [{"type" : "text", "text": f"Context: {context_texts}\nQuestion: {query}"}]
+    if len(context['images']) > 0:
+            for image in context['images']:
+                human_prompt.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image}"}})
+
+
+    system_message = """You are a specialized assistant for answering questions based ONLY on the provided context. Your instructions are to be followed exactly. 
+    1. Review the 'Context' below. 
+    2. If the 'Context' contains the information to answer the 'Question', provide a helpful answer based solely on that context. 
+    3. If the 'Context' does NOT contain the information to answer the 'Question', you MUST respond with the exact phrase: 'I can not process the request'. 
+    4. Do NOT use any of your internal knowledge. Do NOT attempt to answer if the information is not in the 'Context' except for greetings."""
+    
+
+    prompt = ChatPromptTemplate.from_messages([
+    ('system' ,  system_message),
+    MessagesPlaceholder(variable_name = "history"),
+    ('user' , human_prompt)
+])
+
+    final_prompt = prompt.format_messages(history=history)
+    return final_prompt
+   
+    
