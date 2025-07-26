@@ -3,33 +3,39 @@ from dotenv import load_dotenv
 from langchain_ollama import ChatOllama
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.runnables import RunnableLambda, RunnablePassthrough
 import gradio as gr
 from utils import *
 from vectorstore import *
 
 llm = ChatOllama(model="llama3:latest", temperature=0.2)
-prompt = ChatPromptTemplate.from_messages([
-    ('system' ,  "You are a specialized assistant for answering questions based ONLY on the provided context from PDF documents. Your instructions are to be followed exactly. 1. Review the 'Context' below. 2. If the 'Context' contains the information to answer the 'Question', provide a helpful answer based solely on that context. 3. If the 'Context' does NOT contain the information to answer the 'Question', you MUST respond with the exact phrase: 'I can not process the request'. 4. Do NOT use any of your internal knowledge. Do NOT attempt to answer if the information is not in the 'Context' except for greetings. Context: {context} "),
-    MessagesPlaceholder(variable_name = "history"),
-    ('user' , '{query}')
-])
 
-llm_chain = prompt | llm
 
 def process_query(message, history):
-    context = []
+    history_context = []
     
     for msg in history:
         if msg['role'] == 'user' :
-            context.append(HumanMessage(content= msg['content']))
+            history_context.append(HumanMessage(content= msg['content']))
         else :
-            context.append(AIMessage(content = msg['content'] ))
-    
-    chain = prompt | llm
+            history_context.append(AIMessage(content = msg['content'] ))
+
+    retriever_chain = (
+    {
+        "context" : lambda x: parse_docs(retriever.invoke(x['query'])),
+        "query" : lambda x: x['query'],
+        "history" : lambda x: x['history']
+    }
+    | RunnableLambda(build_prompt) 
+    | llm
+)
     if len(message['files']) == 0 :
-        result = retriever.invoke(message['text'])
-        print("\n result :", result)
-        yield "Retrieving information from vectorstore..."
+        for result in retriever_chain.stream({
+            "query" : message['text'],
+            "history" : history_context
+        }):
+            yield result
+
     else :
         try:
             for file in message['files']:
@@ -42,12 +48,14 @@ def process_query(message, history):
             if message['text'].strip() == "" :
                 yield "PDF processing successful"
             else :
-               result = retriever.invoke(message['text'])
-               print("\n result :", result)
+                for result in retriever_chain.stream({
+                    "query" : message['text'],
+                    "history" : history_context
+                }):
+                     yield result
 
         except Exception as e:
             yield f"""Process Failed. {e}"""
-    return {"text" : f"You said: {message['text']}"}
 
 def main():
     load_dotenv()
