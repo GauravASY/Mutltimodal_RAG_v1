@@ -66,9 +66,13 @@ Open the Gradio interface in your browser, upload PDF files, and ask questions a
 - Only answers questions based on the uploaded PDF context.
 - For unsupported queries, responds with: `I can not process the request`.
 
-## Acknowledgements
+## Collaboration
 
-- [LangChain](https://github.com/langchain-ai/langchain)
-- [ChromaDB](https://github.com/chroma-core/chroma)
-- [Ollama](https://github.com/ollama/ollama)
-- [Unstructured](https://github.com/Unstructured-IO/unstructured)
+I welcome contributions from the community! If you would like to collaborate:
+
+- **Fork the repository** and create your branch.
+- **Open issues** for bugs, feature requests, or questions.
+- **Submit pull requests** with clear descriptions of your changes.
+- For major changes, please open an issue first to discuss what you would like to change.
+
+Feel free to reach out via GitHub Discussions or directly via e-mail gauravyadav199808@gmail.com!
