@@ -27,7 +27,9 @@ def process_query(message, history):
     
     chain = prompt | llm
     if len(message['files']) == 0 :
-        yield "Processing Query"
+        result = retriever.invoke(message['text'])
+        print("\n result :", result)
+        yield "Retrieving information from vectorstore..."
     else :
         try:
             for file in message['files']:
@@ -36,11 +38,13 @@ def process_query(message, history):
                 text_summaries, table_summaries = summarize(texts, tables)
                 image_summaries = summarize_images(images)
                 store_documents(texts, text_summaries, tables, table_summaries, images, image_summaries)
-
+    
             if message['text'].strip() == "" :
                 yield "PDF processing successful"
             else :
-                yield "waiting"
+               result = retriever.invoke(message['text'])
+               print("\n result :", result)
+
         except Exception as e:
             yield f"""Process Failed. {e}"""
     return {"text" : f"You said: {message['text']}"}
