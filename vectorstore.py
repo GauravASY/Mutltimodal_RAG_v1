@@ -38,3 +38,4 @@ def store_documents(texts, text_summaries, tables, table_summaries, images, imag
     
     except Exception as e:
         return f"Failed to store documents: {e}"
+
