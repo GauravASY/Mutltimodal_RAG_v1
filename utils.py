@@ -1,7 +1,7 @@
 from unstructured.partition.pdf import partition_pdf
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama import ChatOllama
 from langchain_core.messages import HumanMessage
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 
 
@@ -95,7 +95,7 @@ def build_prompt(args):
     context_texts= ""
     if len(context['texts']) > 0:
         for text_element in context['texts']:
-            context_texts += text_element.page_content 
+            context_texts += text_element.text
 
     human_prompt = [{"type" : "text", "text": f"Context: {context_texts}\nQuestion: {query}"}]
     if len(context['images']) > 0:

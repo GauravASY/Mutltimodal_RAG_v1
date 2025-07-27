@@ -2,7 +2,6 @@ import os
 from dotenv import load_dotenv
 from langchain_ollama import ChatOllama
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnableLambda, RunnablePassthrough
 import gradio as gr
 from utils import *
