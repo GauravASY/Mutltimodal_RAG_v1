@@ -1,6 +1,6 @@
 from unstructured.partition.pdf import partition_pdf
 from langchain_ollama import ChatOllama
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 
@@ -92,12 +92,14 @@ def build_prompt(args):
     query = args['query']
     history = args.get('history', [])
 
+    human_prompt = []
     context_texts= ""
     if len(context['texts']) > 0:
         for text_element in context['texts']:
             context_texts += text_element.text
 
-    human_prompt = [{"type" : "text", "text": f"Context: {context_texts}\nQuestion: {query}"}]
+    human_prompt.append({"type" : "text", "text": f"Context: {context_texts}\nQuestion: {query}"})
+
     if len(context['images']) > 0:
             for image in context['images']:
                 human_prompt.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image}"}})
@@ -110,13 +112,14 @@ def build_prompt(args):
     4. Do NOT use any of your internal knowledge. Do NOT attempt to answer if the information is not in the 'Context' except for greetings."""
     
 
-    prompt = ChatPromptTemplate.from_messages([
-    ('system' ,  system_message),
-    MessagesPlaceholder(variable_name = "history"),
-    ('user' , human_prompt)
-])
 
-    final_prompt = prompt.format_messages(history=history)
+    
+    final_prompt = (
+    [SystemMessage(content=system_message)] +
+    history +                    # <- this is history_context
+    [HumanMessage(content=human_prompt)]
+)
+
     return final_prompt
    
     
